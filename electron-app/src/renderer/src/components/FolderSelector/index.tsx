@@ -1,4 +1,5 @@
-import { TextField } from '@mui/material'
+import { FolderOpen } from '@mui/icons-material'
+import { Box, IconButton, TextField } from '@mui/material'
 
 const FolderSelector = ({
   label,
@@ -20,7 +21,7 @@ const FolderSelector = ({
   }
 
   return (
-    <div>
+    <Box display="flex" alignItems="center">
       <TextField
         margin="normal"
         fullWidth
@@ -30,9 +31,12 @@ const FolderSelector = ({
         error={error}
         InputLabelProps={{ shrink: Boolean(value) }}
         helperText={error}
-        onClick={handleSelectFolder}
+        onChange={(e) => onChange(e.target.value)}
       />
-    </div>
+      <IconButton onClick={handleSelectFolder}>
+        <FolderOpen />
+      </IconButton>
+    </Box>
   )
 }
 
