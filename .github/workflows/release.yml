@@ -27,11 +27,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: electron-app # Adjusted to the correct directory
 
       - name: Build and Publish
         run: npm run release
-        working-directory: electron-app # Adjusted to the correct directory
 
       - name: Create GitHub Release
         id: create_release
@@ -51,6 +49,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /dist/maestro-1.0.0.AppImage # Replace with the actual path to your binary
+          asset_path: ./electron-app/dist/maestro-1.0.0.AppImage # Replace with the actual path to your binary
           asset_name: maestro-1.0.0.AppImage # Replace with the desired asset name
           asset_content_type: application/octet-stream
