@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     branches:
-      - installer-script # Trigger on pushes to the main branch; adjust as needed
+      - installer-script
   pull_request:
     branches:
       - installer-script
@@ -11,6 +11,11 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./electron-app
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -39,3 +44,13 @@ jobs:
           draft: false
           prerelease: false
           body: "Description of the release goes here"
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: /dist/maestro-1.0.0.AppImage # Replace with the actual path to your binary
+          asset_name: maestro-1.0.0.AppImage # Replace with the desired asset name
+          asset_content_type: application/octet-stream
