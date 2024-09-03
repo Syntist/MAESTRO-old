@@ -29,7 +29,4 @@ jobs:
       run: |
         npm run build:linux  # You might need to configure a script in your package.json to run electron-builder
       working-directory: electron-app
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided by GitHub
-        # If you use custom configuration or need to specify artifact names:
-        # args: --config electron-builder-config.yml
+      
