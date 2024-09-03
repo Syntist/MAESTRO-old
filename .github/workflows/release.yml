@@ -1,0 +1,123 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - installer-script
+  pull_request:
+    branches:
+      - installer-script
+
+jobs:
+  electron-release:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./electron-app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20" # Specify the Node.js version based on your requirements
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build and Publish
+        run: npm run release
+
+
+      - name: Check for Existing Release
+        id: check_release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const tagName = `v${process.env.GITHUB_RUN_NUMBER}`;
+            const releases = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existingRelease = releases.data.find(release => release.tag_name === tagName);
+            if (existingRelease) {
+              core.setOutput('release_id', existingRelease.id);
+              core.setOutput('upload_url', existingRelease.upload_url);
+            } else {
+              core.setOutput('release_id', '');
+              core.setOutput('upload_url', '');
+            }
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "v${{ github.run_number }}" # Use a unique tag name
+          release_name: Release ${{ github.run_number }}
+          draft: false
+          prerelease: false
+          body: "Description of the release goes here"
+
+      - name: Get Release Asset Path
+        id: get_asset_path
+        run: |
+          asset_path=$(find ./dist -type f -name '*.AppImage')
+          echo "asset_path=$asset_path" >> $GITHUB_ENV
+          echo "asset_name=$(basename $asset_path)" >> $GITHUB_ENV
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./electron-app/dist/${{ env.asset_name }} # Uses the dynamically found file path
+          asset_name: ${{ env.asset_name }} # Uses the dynamically set asset name
+          asset_content_type: application/octet-stream
+
+
+  installer-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10' 
+
+      - name: Install Nuitka
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install nuitka
+
+      - name: Build Standalone Installer
+        run: |
+          python -m nuitka installer.py --standalone --onefile
+
+      - name: Get Release Asset Path
+        id: get_asset_path
+        run: |
+          asset_path=$(find . -type f -name 'installer*') # Adjust the pattern to match your output file
+          echo "asset_path=$asset_path" >> $GITHUB_ENV
+          echo "asset_name=$(basename $asset_path)" >> $GITHUB_ENV
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.asset_path }}
+          asset_name: ${{ env.asset_name }}
+          asset_content_type: application/octet-stream
