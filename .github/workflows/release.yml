@@ -18,19 +18,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "20"
-
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./electron-app
-
-      - name: Build and Publish
-        run: npm run release
-        working-directory: ./electron-app
-
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -51,43 +38,68 @@ jobs:
   electron-release:
     needs: create-release
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./electron-app
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Get Electron Asset Path
-        id: get_electron_asset_path
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20" # Specify the Node.js version based on your requirements
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build and Publish
+        run: npm run release
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "v${{ github.run_number }}" # Use a unique tag name
+          release_name: Release ${{ github.run_number }}
+          draft: false
+          prerelease: false
+          body: "Description of the release goes here"
+
+      - name: Get Release Asset Path
+        id: get_asset_path
         run: |
           asset_path=$(find ./dist -type f -name '*.AppImage')
-          if [ -n "$asset_path" ]; then
-            echo "asset_path=$asset_path" >> $GITHUB_ENV
-            echo "asset_name=$(basename $asset_path)" >> $GITHUB_ENV
-          else
-            echo "No asset found" >&2
-            exit 1
-          fi
+          echo "asset_path=$asset_path" >> $GITHUB_ENV
+          echo "asset_name=$(basename $asset_path)" >> $GITHUB_ENV
 
-      - name: Upload Electron Release Asset
+      - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ${{ env.asset_path }}
-          asset_name: ${{ env.asset_name }}
+          asset_path: ./electron-app/dist/${{ env.asset_name }} # Uses the dynamically found file path
+          asset_name: ${{ env.asset_name }} # Uses the dynamically set asset name
           asset_content_type: application/octet-stream
+
 
   installer-release:
     needs: create-release
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.10' 
 
       - name: Install Nuitka
         run: |
@@ -98,7 +110,7 @@ jobs:
         run: |
           python -m nuitka installer.py --standalone --onefile
 
-      - name: Upload Installer Release Asset
+      - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
