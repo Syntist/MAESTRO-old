@@ -37,7 +37,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }} # Use only the branch or tag name, not the full ref
+          tag_name: "v${{ github.run_number }}" # Use a unique tag name
           release_name: Release ${{ github.run_number }}
           draft: false
           prerelease: false
