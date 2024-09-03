@@ -22,11 +22,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: electronapp  # Adjusted to the correct directory
+        working-directory: electron-app  # Adjusted to the correct directory
 
       - name: Build and Publish
         run: npm run release
-        working-directory: electronapp  # Adjusted to the correct directory
+        working-directory: electron-app  # Adjusted to the correct directory
 
       - name: Create GitHub Release
         id: create_release
