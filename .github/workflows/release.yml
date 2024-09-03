@@ -16,6 +16,10 @@ jobs:
       run:
         working-directory: ./electron-app
 
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest] # Specify both Ubuntu and Windows
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -23,7 +27,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "20" # Specify the Node.js version based on your requirements
+          node-version: "20"
 
       - name: Install dependencies
         run: npm install
@@ -33,29 +37,51 @@ jobs:
 
       - name: Create GitHub Release
         id: create_release
+        if: ${{ matrix.os == 'ubuntu-latest' }} # Create the release only once, on Ubuntu
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "v${{ github.run_number }}" # Use a unique tag name
+          tag_name: "v${{ github.run_number }}"
           release_name: Release ${{ github.run_number }}
           draft: false
           prerelease: false
           body: "Description of the release goes here"
 
-      - name: Get Release Asset Path
-        id: get_asset_path
+      - name: Get Linux Release Asset Path
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        id: get_linux_asset_path
         run: |
           asset_path=$(find ./dist -type f -name '*.AppImage')
           echo "asset_path=$asset_path" >> $GITHUB_ENV
           echo "asset_name=$(basename $asset_path)" >> $GITHUB_ENV
 
-      - name: Upload Release Asset
+      - name: Get Windows Release Asset Path
+        if: ${{ matrix.os == 'windows-latest' }}
+        id: get_windows_asset_path
+        run: |
+          asset_path=$(Get-ChildItem -Path ./dist -Filter *.exe -Recurse | Select-Object -First 1).FullName
+          echo "asset_path=$asset_path" >> $env:GITHUB_ENV
+          echo "asset_name=$(Split-Path -Path $asset_path -Leaf)" >> $env:GITHUB_ENV
+
+      - name: Upload Linux Release Asset
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./electron-app/dist/${{ env.asset_name }} # Uses the dynamically found file path
-          asset_name: ${{ env.asset_name }} # Uses the dynamically set asset name
+          asset_path: ./electron-app/dist/${{ env.asset_name }}
+          asset_name: ${{ env.asset_name }}
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows Release Asset
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.asset_path }}
+          asset_name: ${{ env.asset_name }}
           asset_content_type: application/octet-stream
