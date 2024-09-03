@@ -46,7 +46,7 @@ jobs:
       - name: Get Release Asset Path
         id: get_asset_path
         run: |
-          asset_path=$(find ./electron-app/dist -type f -name '*.AppImage')
+          asset_path=$(find ./dist -type f -name '*.AppImage')
           echo "asset_path=$asset_path" >> $GITHUB_ENV
           echo "asset_name=$(basename $asset_path)" >> $GITHUB_ENV
 
