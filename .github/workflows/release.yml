@@ -3,29 +3,39 @@ name: Build and Release
 on:
   push:
     branches:
-      - main  # Trigger on pushes to the main branch; adjust as needed
+      - installer-script  # Trigger on pushes to the main branch; adjust as needed
   pull_request:
     branches:
       - installer-script
 
 jobs:
-  build:
-    runs-on: ubuntu-latest  # Use an Ubuntu runner to build Linux and Windows artifacts
-
+  build-and-release:
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'  # Specify your Node.js version
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'  # Specify the Node.js version based on your requirements
 
-    - name: Install dependencies
-      run: npm install
-      working-directory: electron-app
+      - name: Install dependencies
+        run: npm install
+        working-directory: electronapp  # Adjusted to the correct directory
 
-    - name: Build and release Electron app
-      run: |
-        npm run release  # You might need to configure a script in your package.json to run electron-builder
-      working-directory: electron-app
+      - name: Build and Publish
+        run: npm run release
+        working-directory: electronapp  # Adjusted to the correct directory
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.run_number }}
+          draft: false
+          prerelease: false
+          body: 'Description of the release goes here'
