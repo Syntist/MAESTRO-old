@@ -27,6 +27,5 @@ jobs:
 
     - name: Build and release Electron app
       run: |
-        npm run build:linux  # You might need to configure a script in your package.json to run electron-builder
+        npm run release  # You might need to configure a script in your package.json to run electron-builder
       working-directory: electron-app
-      
