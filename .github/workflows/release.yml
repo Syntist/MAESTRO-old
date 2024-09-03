@@ -27,6 +27,7 @@ jobs:
 
     - name: Build and release Electron app
       uses: samuelmeuli/action-electron-builder@v1
+      working-directory: electron-app
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided by GitHub
         # If you use custom configuration or need to specify artifact names:
