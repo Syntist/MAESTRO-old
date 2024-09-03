@@ -26,7 +26,8 @@ jobs:
       working-directory: electron-app
 
     - name: Build and release Electron app
-      uses: samuelmeuli/action-electron-builder@v1
+      run: |
+        npm run build:linux  # You might need to configure a script in your package.json to run electron-builder
       working-directory: electron-app
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided by GitHub
