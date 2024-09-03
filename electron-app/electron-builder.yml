@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: electron-app
+appId: com.maestro.app
+productName: maestro-app
 directories:
   buildResources: build
 files:
@@ -29,17 +29,12 @@ mac:
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
-  linux:
+  target:
+    - AppImage
+    # - snap
+    # - deb
   maintainer: electronjs.org
   category: Utility
-  target:
-    - target: AppImage
-      artifactName: ${name}-${version}.${ext}
-    - target: snap
-      artifactName: ${name}-${version}.${ext}
-      compression: lzo
-    - target: deb
-      artifactName: ${name}-${version}.${ext}
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
