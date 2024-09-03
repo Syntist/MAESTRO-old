@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     branches:
-      - installer-script  # Trigger on pushes to the main branch; adjust as needed
+      - installer-script # Trigger on pushes to the main branch; adjust as needed
   pull_request:
     branches:
       - installer-script
@@ -18,15 +18,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20'  # Specify the Node.js version based on your requirements
+          node-version: "20" # Specify the Node.js version based on your requirements
 
       - name: Install dependencies
         run: npm install
-        working-directory: electron-app  # Adjusted to the correct directory
+        working-directory: electron-app # Adjusted to the correct directory
 
       - name: Build and Publish
         run: npm run release
-        working-directory: electron-app  # Adjusted to the correct directory
+        working-directory: electron-app # Adjusted to the correct directory
 
       - name: Create GitHub Release
         id: create_release
@@ -34,8 +34,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ github.ref_name }} # Use only the branch or tag name, not the full ref
           release_name: Release ${{ github.run_number }}
           draft: false
           prerelease: false
-          body: 'Description of the release goes here'
+          body: "Description of the release goes here"
