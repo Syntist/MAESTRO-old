@@ -3,10 +3,10 @@ name: Build and Release
 on:
   push:
     branches:
-      - main  # Trigger on pushes to the main branch; adjust as needed
+      - installer-script  # Trigger on pushes to the main branch; adjust as needed
   pull_request:
     branches:
-      - main
+      - installer-script
 
 jobs:
   build:
