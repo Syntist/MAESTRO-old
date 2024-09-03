@@ -104,6 +104,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ${{ installer.bin }}
-          asset_name: ${{ installer.bin }}
+          asset_path: ./installer.bin
+          asset_name: installer.bin
           asset_content_type: application/octet-stream
