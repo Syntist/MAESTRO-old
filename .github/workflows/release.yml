@@ -1,0 +1,32 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch; adjust as needed
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use an Ubuntu runner to build Linux and Windows artifacts
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'  # Specify your Node.js version
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build and release Electron app
+      uses: samuelmeuli/action-electron-builder@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided by GitHub
+        # If you use custom configuration or need to specify artifact names:
+        # args: --config electron-builder-config.yml

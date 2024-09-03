@@ -14,6 +14,12 @@ FILENAME=$(basename "$MODEL_URL")
 DIRECTORY="./models"
 FILEPATH="$DIRECTORY/$FILENAME"
 
+git clone https://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@github.com/syntist/MAESTRO
+
+cp -r ./MAESTRO/SpeCollate $path/electron-app
+
+SPEC_PATH=$path/electron-app/SpeCollate
+
 # Check if the file already exists
 if [ -f "$FILEPATH" ]; then
     echo "File $FILENAME already exists in $DIRECTORY."
@@ -40,7 +46,7 @@ fi
 
 PY_FILE=$path/.python/bin/python3
 
-$PY_FILE -m pip install -r $path/SpeCollate/requirements.txt
+$PY_FILE -m pip install -r $SPEC_PATH/requirements.txt
 
 
 ENV_DIR="$path/electron-app"
@@ -56,8 +62,7 @@ else
     echo "No .env file to empty."
 fi
 
-
-echo "VITE_SPECOLLATE=\"$PY_FILE $path/SpeCollate/run_search.py\"" > "$ENV_FILE"
+echo "VITE_SPECOLLATE=\"$PY_FILE $SPEC_PATH/run_search.py\"" > "$ENV_FILE"
 echo "VITE_MODEL=\"$path/models/specollate_model.pt\"" >> "$ENV_FILE"
 echo "VITE_CONFIG=\"$path/electron-app/config.ini\"" >> "$ENV_FILE"
 

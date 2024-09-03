@@ -29,12 +29,17 @@ mac:
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
-  target:
-    - AppImage
-    - snap
-    - deb
+  linux:
   maintainer: electronjs.org
   category: Utility
+  target:
+    - target: AppImage
+      artifactName: ${name}-${version}.${ext}
+    - target: snap
+      artifactName: ${name}-${version}.${ext}
+      compression: lzo
+    - target: deb
+      artifactName: ${name}-${version}.${ext}
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
