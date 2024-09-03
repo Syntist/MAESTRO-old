@@ -58,7 +58,7 @@ jobs:
       - name: Get Electron Asset Path
         id: get_electron_asset_path
         run: |
-          asset_path=$(find ./electron-app/dist -type f -name '*.AppImage')
+          asset_path=$(find ./dist -type f -name '*.AppImage')
           if [ -n "$asset_path" ]; then
             echo "asset_path=$asset_path" >> $GITHUB_ENV
             echo "asset_name=$(basename $asset_path)" >> $GITHUB_ENV
@@ -98,24 +98,12 @@ jobs:
         run: |
           python -m nuitka installer.py --standalone --onefile
 
-      - name: Get Installer Asset Path
-        id: get_installer_asset_path
-        run: |
-          asset_path=$(find . -type f -name 'installer*')
-          if [ -n "$asset_path" ]; then
-            echo "asset_path=$asset_path" >> $GITHUB_ENV
-            echo "asset_name=$(basename $asset_path)" >> $GITHUB_ENV
-          else
-            echo "No asset found" >&2
-            exit 1
-          fi
-
       - name: Upload Installer Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ${{ env.asset_path }}
-          asset_name: ${{ env.asset_name }}
+          asset_path: ${{ ./installer.bin }}
+          asset_name: ${{ installer.bin }}
           asset_content_type: application/octet-stream
