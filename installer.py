@@ -36,9 +36,6 @@ def main():
     models_dir.mkdir(exist_ok=True)
     python_dir.mkdir(exist_ok=True)
 
-    # Clone the MAESTRO repo
-    run_command("git clone https://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@github.com/syntist/MAESTRO")
-
     # Copy SpeCollate to electron-app
     electron_app_dir = Path(path) / "electron-app"
     spe_collate_dest = Path(path) / "SpeCollate"
